@@ -98,9 +98,9 @@ def build_MLP_decoder_graph(latent_samples, px, py, layers=[500]):
 
 class mnistVAE:
 
-    dtype = tf.float64
+    dtype = tf.float16
 
-    def __init__(self, im_width=28, im_height=28, L=16):
+    def __init__(self, im_width=640, im_height=360, L=150):
         """
         VAE for rotated MNIST data. Architecture (almost) same as in Casale (see Figure 4 in Supplementary material).
 
@@ -127,15 +127,21 @@ class mnistVAE:
 
         self.decoder = tf.keras.Sequential(
             [
-                tf.keras.layers.Dense(128, dtype=self.dtype),
-                tf.keras.layers.Reshape(target_shape=(4, 4, 8)),
+                tf.keras.layers.Dense(768, dtype=self.dtype),
+                tf.keras.layers.Reshape(target_shape=(8, 12, 8)),
                 tf.keras.layers.UpSampling2D(size=(2, 2)),
                 tf.keras.layers.Conv2D(
-                    filters=8, kernel_size=3, strides=(1, 1), activation='elu', padding='same', dtype=self.dtype),
+                    filters=8, kernel_size=(4,3), strides=(1, 1), activation='elu', dtype=self.dtype),
                 tf.keras.layers.UpSampling2D(size=(2, 2)),
                 tf.keras.layers.Conv2D(
                     filters=8, kernel_size=3, strides=(1, 1), activation='elu', dtype=self.dtype),
                 tf.keras.layers.UpSampling2D(size=(2, 2)),
+                tf.keras.layers.Conv2D(
+                    filters=8, kernel_size=(3,4), strides=(1, 1), activation='elu', dtype=self.dtype),
+                tf.keras.layers.UpSampling2D(size=(2, 2)),
+                tf.keras.layers.Conv2D(
+                    filters=8, kernel_size=3, strides=(1, 1), activation='elu', dtype=self.dtype),
+                tf.keras.layers.UpSampling2D(size=(4, 4)),
                 tf.keras.layers.Conv2D(
                     filters=1, kernel_size=3, strides=(1, 1), activation='elu', padding='same', dtype=self.dtype),
             ])

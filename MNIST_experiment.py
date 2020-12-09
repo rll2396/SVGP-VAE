@@ -25,7 +25,7 @@ tfk = tfp.math.psd_kernels
 
 def run_experiment_rotated_mnist_SVGPVAE(args, args_dict):
     """
-    Function with tensorflow graph and session for SVGPVAE experiments on rotated MNIST data.
+    Function with tensorflow graph and session for SVGPVAE experiments on rotated NIST data.
     For description of SVGPVAE see chapter 7 in SVGPVAE.tex
 
     :param args:
@@ -39,7 +39,7 @@ def run_experiment_rotated_mnist_SVGPVAE(args, args_dict):
     N_test = n * 270
 
     if args.save:
-        # Make a folder to save everything
+        # ake a folder to save everything
         extra = args.elbo + "_" + str(args.beta)
         chkpnt_dir = make_checkpoint_folder(args.base_dir, args.expid, extra)
         pic_folder = chkpnt_dir + "pics/"
@@ -75,20 +75,20 @@ def run_experiment_rotated_mnist_SVGPVAE(args, args_dict):
         if args.elbo == "CVAE":
             VAE = mnistCVAE(L=args.L)
         else:
-            VAE = mnistVAE(L=args.L)
+            VAE = mnistVAE()
         beta = tf.compat.v1.placeholder(dtype=tf.float64, shape=())
 
         # placeholders
-        train_aux_data_placeholder = tf.compat.v1.placeholder(dtype=tf.float64, shape=(None, 2 + args.M))
+        train_aux_data_placeholder = tf.compat.v1.placeholder(dtype=tf.float64, shape=(None, 2 + args.))
         train_images_placeholder = tf.compat.v1.placeholder(dtype=tf.float64, shape=(None, 28, 28, 1))
-        test_aux_data_placeholder = tf.compat.v1.placeholder(dtype=tf.float64, shape=(None, 2 + args.M))
+        test_aux_data_placeholder = tf.compat.v1.placeholder(dtype=tf.float64, shape=(None, 2 + args.))
         test_images_placeholder = tf.compat.v1.placeholder(dtype=tf.float64, shape=(None, 28, 28, 1))
 
         if "SVGPVAE" in args.elbo:  # SVGPVAE
             inducing_points_init = generate_init_inducing_points(args.mnist_data_path + 'train_data' + ending,
                                                                  n=args.nr_inducing_points,
                                                                  remove_test_angle=None,
-                                                                 PCA=args.PCA, M=args.M)
+                                                                 PCA=args.PCA, =args.)
             titsias = 'Titsias' in args.elbo
             ip_joint = not args.ip_joint
             GP_joint = not args.GP_joint
@@ -98,8 +98,8 @@ def run_experiment_rotated_mnist_SVGPVAE(args, args_dict):
                                                            'pca_ov_init{}.p'.format(args.dataset), 'rb'))
                 else:  # initialize object vectors randomly
                     object_vectors_init = np.random.normal(0, 1.5,
-                                                           len(args.dataset)*400*args.M).reshape(len(args.dataset)*400,
-                                                                                                 args.M)
+                                                           len(args.dataset)*400*args.).reshape(len(args.dataset)*400,
+                                                                                                 args.)
             else:
                 object_vectors_init = None
 
@@ -311,7 +311,7 @@ def run_experiment_rotated_mnist_SVGPVAE(args, args_dict):
             lagrange_mult_ = 1.0
 
             start_time = time.time()
-            cgen_test_set_MSE = []
+            cgen_test_set_SE = []
             for epoch in range(nr_epochs):
 
                 # 7.1) train for one epoch
@@ -361,8 +361,8 @@ def run_experiment_rotated_mnist_SVGPVAE(args, args_dict):
                             regime = training_regime[epoch] if "SVGPVAE" in args.elbo else "VAE"
                             print('Epoch {}, opt regime {}, mean ELBO per batch: {}'.format(epoch, regime,
                                                                                             np.mean(elbos)))
-                            MSE = np.sum(losses) / N_train
-                            print('MSE loss on train set for epoch {} : {}'.format(epoch, MSE))
+                            SE = np.sum(losses) / N_train
+                            print('SE loss on train set for epoch {} : {}'.format(epoch, SE))
 
                             end_time_epoch = time.time()
                             print("Time elapsed for epoch {}, opt regime {}: {}".format(epoch,
@@ -382,8 +382,8 @@ def run_experiment_rotated_mnist_SVGPVAE(args, args_dict):
                                                                      lagrange_mult_placeholder: lagrange_mult_})
                             losses.append(recon_loss_)
                         except tf.errors.OutOfRangeError:
-                            MSE = np.sum(losses) / N_eval
-                            print('MSE loss on eval set for epoch {} : {}'.format(epoch, MSE))
+                            SE = np.sum(losses) / N_eval
+                            print('SE loss on eval set for epoch {} : {}'.format(epoch, SE))
                             break
 
                 # 7.3) save metrics to Pandas df for model diagnostics
@@ -437,12 +437,12 @@ def run_experiment_rotated_mnist_SVGPVAE(args, args_dict):
                             losses.append(recon_loss_)
                             recon_images_arr.append(recon_images_)
                         except tf.errors.OutOfRangeError:
-                            MSE = np.sum(losses) / N_test
-                            print('MSE loss on test set for epoch {} : {}'.format(epoch, MSE))
+                            SE = np.sum(losses) / N_test
+                            print('SE loss on test set for epoch {} : {}'.format(epoch, SE))
                             recon_images_arr = np.concatenate(tuple(recon_images_arr))
                             plot_mnist(test_data_dict['images'],
                                        recon_images_arr,
-                                       title="Epoch: {}. Recon MSE test set:{}".format(epoch + 1, round(MSE, 4)))
+                                       title="Epoch: {}. Recon SE test set:{}".format(epoch + 1, round(SE, 4)))
                             if args.show_pics:
                                 plt.show()
                                 plt.pause(0.01)
@@ -491,19 +491,19 @@ def run_experiment_rotated_mnist_SVGPVAE(args, args_dict):
 
                     # test set: plot generations
                     if args.elbo != "VAE":
-                        cgen_test_set_MSE.append((epoch, recon_loss_cgen))
-                        print("Conditional generation MSE loss on test set for epoch {}: {}".format(epoch,
+                        cgen_test_set_SE.append((epoch, recon_loss_cgen))
+                        print("Conditional generation SE loss on test set for epoch {}: {}".format(epoch,
                                                                                                     recon_loss_cgen))
                         plot_mnist(test_data_dict['images'],
                                    recon_images_cgen,
-                                   title="Epoch: {}. CGEN MSE test set:{}".format(epoch + 1, round(recon_loss_cgen, 4)))
+                                   title="Epoch: {}. CGEN SE test set:{}".format(epoch + 1, round(recon_loss_cgen, 4)))
                         if args.show_pics:
                             plt.show()
                             plt.pause(0.01)
                         if args.save:
                             plt.savefig(pic_folder + str(g_s_) + "_cgen.png")
                             with open(pic_folder + "test_metrics.txt", "a") as f:
-                                f.write("{},{},{}\n".format(epoch + 1, round(MSE, 4), round(recon_loss_cgen, 4)))
+                                f.write("{},{},{}\n".format(epoch + 1, round(SE, 4), round(recon_loss_cgen, 4)))
 
                     # save model weights
                     if args.save and args.save_model_weights:
@@ -514,10 +514,10 @@ def run_experiment_rotated_mnist_SVGPVAE(args, args_dict):
             print("Running time for {} epochs: {}".format(nr_epochs, round(end_time - start_time, 2)))
 
             if "SVGPVAE" in args.elbo:
-                # report best test set cgen MSE achieved throughout training
-                best_cgen_MSE = sorted(cgen_test_set_MSE, key=lambda x: x[1])[0]
-                print("Best cgen MSE on test set throughout training at epoch {}: {}".format(best_cgen_MSE[0],
-                                                                                             best_cgen_MSE[1]))
+                # report best test set cgen SE achieved throughout training
+                best_cgen_SE = sorted(cgen_test_set_SE, key=lambda x: x[1])[0]
+                print("Best cgen SE on test set throughout training at epoch {}: {}".format(best_cgen_SE[0],
+                                                                                             best_cgen_SE[1]))
 
             # save images from conditional generation
             if args.save and args.elbo != "VAE":
@@ -551,7 +551,7 @@ def run_experiment_rotated_mnist_Casale(args):
     N_test = n * 270
 
     if args.save:
-        # Make a folder to save everything
+        # ake a folder to save everything
         extra = args.elbo + "_" + str(args.beta)
         chkpnt_dir = make_checkpoint_folder(args.base_dir, args.expid, extra)
         pic_folder = chkpnt_dir + "pics/"
@@ -570,12 +570,12 @@ def run_experiment_rotated_mnist_Casale(args):
     with graph.as_default():
 
         # ====================== 1) import data and data placeholders ======================
-        GPLVM_ending = "" if args.M == 8 else "_{}".format(args.M)
+        GPLV_ending = "" if args. == 8 else "_{}".format(args.)
         train_data_dict = pickle.load(open(args.mnist_data_path + 'train_data' + args.dataset +
-                                           "{}.p".format(GPLVM_ending), 'rb'))
+                                           "{}.p".format(GPLV_ending), 'rb'))
         train_data_dict = sort_train_data(train_data_dict, dataset=args.dataset)
         train_ids_mask = pickle.load(open(args.mnist_data_path + "train_ids_mask" + args.dataset +
-                                          "{}.p".format(GPLVM_ending), 'rb'))
+                                          "{}.p".format(GPLV_ending), 'rb'))
 
         train_data_images = tf.data.Dataset.from_tensor_slices(train_data_dict['images'])
         train_data_aux_data = tf.data.Dataset.from_tensor_slices(train_data_dict['aux_data'])
@@ -584,13 +584,13 @@ def run_experiment_rotated_mnist_Casale(args):
         training_init_op = iterator.make_initializer(train_data)
         input_batch = iterator.get_next()
 
-        train_aux_data_placeholder = tf.compat.v1.placeholder(dtype=tf.float64, shape=(None, 3 + args.M))
+        train_aux_data_placeholder = tf.compat.v1.placeholder(dtype=tf.float64, shape=(None, 3 + args.))
         train_images_placeholder = tf.compat.v1.placeholder(dtype=tf.float64, shape=(None, 28, 28, 1))
-        test_aux_data_placeholder = tf.compat.v1.placeholder(dtype=tf.float64, shape=(None, 2 + args.M))
+        test_aux_data_placeholder = tf.compat.v1.placeholder(dtype=tf.float64, shape=(None, 2 + args.))
         test_images_placeholder = tf.compat.v1.placeholder(dtype=tf.float64, shape=(None, 28, 28, 1))
 
         test_data_dict = pickle.load(open(args.mnist_data_path + 'test_data' + args.dataset +
-                                          "{}.p".format(GPLVM_ending), 'rb'))
+                                          "{}.p".format(GPLV_ending), 'rb'))
 
         # ====================== 2) build ELBO graph ======================
 
@@ -602,11 +602,11 @@ def run_experiment_rotated_mnist_Casale(args):
         GP_joint = not args.GP_joint
         if args.PCA:  # use PCA embeddings for initialization of object vectors
             object_vectors_init = pickle.load(
-                open(args.mnist_data_path + 'pca_ov_init{}{}.p'.format(args.dataset, GPLVM_ending), 'rb'))
+                open(args.mnist_data_path + 'pca_ov_init{}{}.p'.format(args.dataset, GPLV_ending), 'rb'))
         else:  # initialize object vectors randomly
             assert args.ov_joint, "If --ov_joint is not used, at least PCA initialization must be utilized."
-            object_vectors_init = np.random.normal(0, 1.5, len(args.dataset) * 400 * args.M).reshape(
-                len(args.dataset) * 400, args.M)
+            object_vectors_init = np.random.normal(0, 1.5, len(args.dataset) * 400 * args.).reshape(
+                len(args.dataset) * 400, args.)
 
         GP = casaleGP(fixed_gp_params=GP_joint, object_vectors_init=object_vectors_init,
                       object_kernel_normalize=args.object_kernel_normalize, ov_joint=args.ov_joint)
@@ -736,7 +736,7 @@ def run_experiment_rotated_mnist_Casale(args):
             sess.run(init_op)
 
             start_time = time.time()
-            cgen_test_set_MSE = []
+            cgen_test_set_SE = []
             # training loop
             for epoch in range(nr_epochs):
 
@@ -782,10 +782,10 @@ def run_experiment_rotated_mnist_Casale(args):
                             print('Epoch {}, opt regime {}, mean ELBO per batch: {}'.format(epoch,
                                                                                             training_regime[epoch],
                                                                                             np.mean(elbos)))
-                            MSE = np.sum(losses) / N_train
-                            print('Epoch {}, opt regime {}, MSE loss on train set: {}'.format(epoch,
+                            SE = np.sum(losses) / N_train
+                            print('Epoch {}, opt regime {}, SE loss on train set: {}'.format(epoch,
                                                                                               training_regime[epoch],
-                                                                                              MSE))
+                                                                                              SE))
 
                             end_time_epoch = time.time()
                             print("Time elapsed for epoch {}, opt regime {}: {}".format(epoch,
@@ -833,12 +833,12 @@ def run_experiment_rotated_mnist_Casale(args):
                                                                              test_aux_data_placeholder:
                                                                                  test_data_dict['aux_data']})
 
-                    cgen_test_set_MSE.append((epoch, recon_loss_cgen))
-                    print("Conditional generation MSE loss on test set for epoch {}: {}".format(epoch,
+                    cgen_test_set_SE.append((epoch, recon_loss_cgen))
+                    print("Conditional generation SE loss on test set for epoch {}: {}".format(epoch,
                                                                                                 recon_loss_cgen))
                     plot_mnist(test_data_dict['images'],
                                recon_images_cgen,
-                               title="Epoch: {}. CGEN MSE test set:{}".format(epoch + 1, round(recon_loss_cgen, 4)))
+                               title="Epoch: {}. CGEN SE test set:{}".format(epoch + 1, round(recon_loss_cgen, 4)))
                     if args.show_pics:
                         plt.show()
                         plt.pause(0.01)
@@ -855,10 +855,10 @@ def run_experiment_rotated_mnist_Casale(args):
             end_time = time.time()
             print("Running time for {} epochs: {}".format(nr_epochs, round(end_time - start_time, 2)))
 
-            # report best test set cgen MSE achieved throughout training
-            best_cgen_MSE = sorted(cgen_test_set_MSE, key=lambda x: x[1])[0]
-            print("Best cgen MSE on test set throughout training at epoch {}: {}".format(best_cgen_MSE[0],
-                                                                                         best_cgen_MSE[1]))
+            # report best test set cgen SE achieved throughout training
+            best_cgen_SE = sorted(cgen_test_set_SE, key=lambda x: x[1])[0]
+            print("Best cgen SE on test set throughout training at epoch {}: {}".format(best_cgen_SE[0],
+                                                                                         best_cgen_SE[1]))
 
             # save images from conditional generation
             if args.save:
@@ -870,15 +870,15 @@ if __name__=="__main__":
 
     default_base_dir = os.getcwd()
 
-    parser_mnist = argparse.ArgumentParser(description='Rotated MNIST experiment.')
-    parser_mnist.add_argument('--expid', type=str, default="debug_MNIST", help='give this experiment a name')
+    parser_mnist = argparse.ArgumentParser(description='Rotated NIST experiment.')
+    parser_mnist.add_argument('--expid', type=str, default="debug_NIST", help='give this experiment a name')
     parser_mnist.add_argument('--base_dir', type=str, default=default_base_dir,
                               help='folder within a new dir is made for each run')
     parser_mnist.add_argument('--elbo', type=str, choices=['VAE', 'CVAE', 'SVGPVAE_Hensman', 'SVGPVAE_Titsias',
                                                            'GPVAE_Casale', 'GPVAE_Casale_batch'],
                               default='VAE')
-    parser_mnist.add_argument('--mnist_data_path', type=str, default='MNIST data/',
-                              help='Path where rotated MNIST data is stored.')
+    parser_mnist.add_argument('--mnist_data_path', type=str, default='test data/',
+                              help='Path where rotated NIST data is stored.')
     parser_mnist.add_argument('--batch_size', type=int, default=256)
     parser_mnist.add_argument('--nr_epochs', type=int, default=1000)
     parser_mnist.add_argument('--beta', type=float, default=0.001)
@@ -899,7 +899,7 @@ if __name__=="__main__":
     parser_mnist.add_argument('--test_set_metrics', action='store_true',
                               help='Calculate metrics on test data. If false, metrics are calculated on eval data.')
     parser_mnist.add_argument('--GECO', action='store_true', help='Use GECO algorithm for training.')
-    parser_mnist.add_argument('--alpha', type=float, default=0.99, help='Moving average parameter for GECO.')
+    parser_mnist.add_argument('--alpha', type=float, default=0.99, help='oving average parameter for GECO.')
     parser_mnist.add_argument('--kappa_squared', type=float, default=0.020, help='Constraint parameter for GECO.')
     parser_mnist.add_argument('--object_kernel_normalize', action='store_true',
                               help='Normalize object (linear) kernel.')
@@ -909,7 +909,7 @@ if __name__=="__main__":
                               help='Use PCA embeddings for initialization of object vectors.')
     parser_mnist.add_argument('--bias_analysis', action='store_true',
                               help="Compute bias of estimator for mean vector in hat{q}^Titsias for every epoch.")
-    parser_mnist.add_argument('--M', type=int, default=8, help="Dimension of GPLVM vectors.")
+    parser_mnist.add_argument('--', type=int, default=8, help="Dimension of GPLV vectors.")
 
     args_mnist = parser_mnist.parse_args()
 

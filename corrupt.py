@@ -7,6 +7,8 @@ import numpy as np
 import os
 import pickle
 import glob
+from pathlib import Path
+from shutil import copyfile
 
 def corrupt_video(filename, frames = "random", frame_percent = 30, video_percent = 30):
     '''
@@ -26,7 +28,7 @@ def corrupt_video(filename, frames = "random", frame_percent = 30, video_percent
     nframes = meta['nframes']
     frameslist = np.arange(nframes)
     size = meta['size']
-    imlist = np.zeros((nframes-2, size[1], size[0]), dtype=np.uint8)
+    imlist = np.zeros((nframes-2, size[1], size[0]), dtype=np.float16)
     if frames == "random":
         random.shuffle(frameslist)
         lim = int(np.round(nframes*video_percent/100))    
@@ -76,7 +78,7 @@ def run():
     # install ffmpeg plugin if needed
     imageio.plugins.ffmpeg.download()
 #     link of the video to be downloaded  
-    link = "https://www.youtube.com/watch?v=mpjREfvZiDs"
+    link = "https://www.youtube.com/watch?v=QC8iQqtG0hg"
 #     https://stackoverflow.com/questions/49643206/attributeerror-youtube-object-has-no-attribute-get-videos
 #     download video
     yt = pytube.YouTube(link)
@@ -88,8 +90,7 @@ def run():
     frame_percent = 30
     # filename = fpath
     root = os.getcwd()
-    filename = root + "\Apple HomePod Review The Dumbest Smart Speaker.mp4"
-    
+    filename = root + "\\5 Second Video Watch the Milky Way Rise.mp4"
 #     generate list of all frames from video, takes a couple minutes for the 5 min. video I was testing, and takes 
 # longer if you corrupt more frames. Could probably be improved.
     print("generating corruption")
@@ -97,12 +98,16 @@ def run():
     
     #videoname = root + "\\test.mp4"
     images = imlist.reshape(imlist.shape+(1,))
-    aux_data = np.arange(len(imlist), dtype=np.uint16).reshape(len(imlist), 1)
+    aux_data = np.arange(len(imlist), dtype=np.float16).reshape(len(imlist), 1)
     print("saving video")
 #     save video, takes a while on longer videos
     dataset = {'images':images, 'aux_data':aux_data}
-    with open("test.p", 'wb') as test_pickle:
+    Path("test data").mkdir(parents=True, exist_ok=True)
+    with open("test data/train_data3.p", 'wb+') as test_pickle:
         pickle.dump(dataset, test_pickle)
+    copyfile("test data/train_data3.p", "test data/test_data3.p")
+    copyfile("test data/train_data3.p", "test data/eval_data3.p")
+    copyfile("MNIST data/train_ids_mask3.p", "test data/train_ids_mask3.p")
     
 if __name__ == "__main__":
     run()
