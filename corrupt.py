@@ -96,6 +96,18 @@ def run():
     print("generating corruption")
     imlist, fps = corrupt_video(filename, frames = frames, frame_percent = frame_percent, video_percent = video_percent)
     
+#--------------cropping video-------------------------------------------------    
+    horiz_width = 28
+    vert_width = 28
+    
+    orig_horiz, orig_vert = imlist.shape[1], imlist.shape[2]
+    
+    hw1, hw2 = (orig_horiz - horiz_width)//2, (orig_horiz + horiz_width)//2
+    vw1, vw2 = (orig_vert - vert_width)//2, (orig_vert + vert_width)//2
+    
+    imlist = imlist[:,hw1:hw2, vw1:vw2]
+#-------------------------------------------------------------------------------
+    
     #videoname = root + "\\test.mp4"
     images = imlist.reshape(imlist.shape+(1,))
     aux_data = np.arange(len(imlist), dtype=np.float16).reshape(len(imlist), 1)
