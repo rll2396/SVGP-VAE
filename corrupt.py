@@ -28,7 +28,7 @@ def corrupt_video(filename, frames = "random", frame_percent = 30, video_percent
     nframes = meta['nframes']
     frameslist = np.arange(nframes)
     size = meta['size']
-    imlist = np.zeros((nframes-2, size[1], size[0]), dtype=np.float16)
+    imlist = np.zeros((nframes-2, size[1], size[0]), dtype=np.float64)
     if frames == "random":
         random.shuffle(frameslist)
         lim = int(np.round(nframes*video_percent/100))    
@@ -110,7 +110,7 @@ def run():
     
     #videoname = root + "\\test.mp4"
     images = imlist.reshape(imlist.shape+(1,))
-    aux_data = np.arange(len(imlist), dtype=np.float16).reshape(len(imlist), 1)
+    aux_data = np.arange(len(imlist), dtype=np.float64).reshape(len(imlist), 1)
     print("saving video")
 #     save video, takes a while on longer videos
     dataset = {'images':images, 'aux_data':aux_data}
