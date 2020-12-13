@@ -81,20 +81,20 @@ def run():
     link = "https://www.youtube.com/watch?v=QC8iQqtG0hg"
 #     https://stackoverflow.com/questions/49643206/attributeerror-youtube-object-has-no-attribute-get-videos
 #     download video
+    filename = "vid"
     yt = pytube.YouTube(link)
     stream = yt.streams.first()
-    stream.download()
+    stream.download(filename=filename)
+
     
     frames = "random"
     video_percent = 1
     frame_percent = 30
     # filename = fpath
-    root = os.getcwd()
-    filename = root + "\\5 Second Video Watch the Milky Way Rise.mp4"
 #     generate list of all frames from video, takes a couple minutes for the 5 min. video I was testing, and takes 
 # longer if you corrupt more frames. Could probably be improved.
     print("generating corruption")
-    imlist, fps = corrupt_video(filename, frames = frames, frame_percent = frame_percent, video_percent = video_percent)
+    imlist, fps = corrupt_video(filename + ".mp4", frames = frames, frame_percent = frame_percent, video_percent = video_percent)
     
 #--------------cropping video-------------------------------------------------    
     horiz_width = 28
@@ -108,7 +108,6 @@ def run():
     imlist = imlist[:,hw1:hw2, vw1:vw2]
 #-------------------------------------------------------------------------------
     
-    #videoname = root + "\\test.mp4"
     images = imlist.reshape(imlist.shape+(1,))
     aux_data = np.arange(len(imlist), dtype=np.float64).reshape(len(imlist), 1)
     print("saving video")
