@@ -110,6 +110,8 @@ def run():
     
     images = imlist.reshape(imlist.shape+(1,))
     aux_data = np.arange(len(imlist), dtype=np.float64).reshape(len(imlist), 1)
+    padding = np.empty((len(imlist), 9))
+    aux_data = np.concatenate((aux_data, padding), axis=1)
     print("saving video")
 #     save video, takes a while on longer videos
     dataset = {'images':images, 'aux_data':aux_data}

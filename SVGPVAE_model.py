@@ -441,39 +441,46 @@ class mnistSVGP(mainSVGP):
         # y_inducing = tf.shape(y)[0] == self.nr_inducing
 
         # unpack auxiliary data
-        if self.object_vectors is None:
-            x_view, x_object, y_view, y_object = x[:, 1], x[:, 2:], y[:, 1], y[:, 2:]
-        else:
-            x_view, y_view = x[:, 1], y[:, 1]
-            if x_inducing:
-                x_object = x[:, 2:]
-            else:
-                x_object = tf.gather(self.object_vectors, tf.cast(x[:, 0], dtype=tf.int64))
-            if y_inducing:
-                y_object = y[:, 2:]
-            else:
-                y_object = tf.gather(self.object_vectors, tf.cast(y[:, 0], dtype=tf.int64))
+        #if self.object_vectors is None:
+        #    x_view, x_object, y_view, y_object = x[:, 1], x[:, 2:], y[:, 1], y[:, 2:]
+        #else:
+        #    x_view, y_view = x[:, 1], y[:, 1]
+        #    if x_inducing:
+        #        x_object = x[:, 2:]
+        #    else:
+        #        x_object = tf.gather(self.object_vectors, tf.cast(x[:, 0], dtype=tf.int64))
+        #    if y_inducing:
+        #        y_object = y[:, 2:]
+        #    else:
+        #        y_object = tf.gather(self.object_vectors, tf.cast(y[:, 0], dtype=tf.int64))
 
-        # compute kernel matrix
+        ## compute kernel matrix
+        #if diag_only:
+        #    view_matrix = self.kernel_view.apply(tf.expand_dims(x_view, axis=1), tf.expand_dims(y_view, axis=1))
+        #else:
+        #    view_matrix = self.kernel_view.matrix(tf.expand_dims(x_view, axis=1), tf.expand_dims(y_view, axis=1))
+
+        #if diag_only:
+        #    object_matrix = self.kernel_object.apply(x_object, y_object)
+        #    if self.K_obj_normalize:
+        #        obj_norm = tf.math.reduce_euclidean_norm(x_object, axis=1) * tf.math.reduce_euclidean_norm(y_object, axis=1)
+        #        object_matrix = object_matrix / obj_norm
+        #else:
+        #    object_matrix = self.kernel_object.matrix(x_object, y_object)
+        #    if self.K_obj_normalize:  # normalize object matrix
+        #        obj_norm = 1 / tf.matmul(tf.math.reduce_euclidean_norm(x_object, axis=1, keepdims=True),
+        #                                 tf.transpose(tf.math.reduce_euclidean_norm(y_object, axis=1, keepdims=True),
+        #                                              perm=[1, 0]))
+        #        object_matrix = object_matrix * obj_norm
+        #print(view_matrix * object_matrix)
+        #return view_matrix * object_matrix
+
         if diag_only:
-            view_matrix = self.kernel_view.apply(tf.expand_dims(x_view, axis=1), tf.expand_dims(y_view, axis=1))
+            matrix = self.kernel_view.apply(tf.expand_dims(x[:, 0], axis=1), tf.expand_dims(y[:, 0], axis=1))
         else:
-            view_matrix = self.kernel_view.matrix(tf.expand_dims(x_view, axis=1), tf.expand_dims(y_view, axis=1))
+            matrix = self.kernel_view.matrix(tf.expand_dims(x[:, 0], axis=1), tf.expand_dims(y[:, 0], axis=1))
 
-        if diag_only:
-            object_matrix = self.kernel_object.apply(x_object, y_object)
-            if self.K_obj_normalize:
-                obj_norm = tf.math.reduce_euclidean_norm(x_object, axis=1) * tf.math.reduce_euclidean_norm(y_object, axis=1)
-                object_matrix = object_matrix / obj_norm
-        else:
-            object_matrix = self.kernel_object.matrix(x_object, y_object)
-            if self.K_obj_normalize:  # normalize object matrix
-                obj_norm = 1 / tf.matmul(tf.math.reduce_euclidean_norm(x_object, axis=1, keepdims=True),
-                                         tf.transpose(tf.math.reduce_euclidean_norm(y_object, axis=1, keepdims=True),
-                                                      perm=[1, 0]))
-                object_matrix = object_matrix * obj_norm
-
-        return view_matrix * object_matrix
+        return matrix
 
     def variable_summary(self):
         """

@@ -349,7 +349,7 @@ def run_experiment_rotated_mnist_SVGPVAE(args, args_dict):
                         elbos.append(elbo_)
                         losses.append(recon_loss_)
                         first_step = False  # switch for initizalition of GECO algorithm
-                    except tf.errors.OutOfRangeError:
+                    except (tf.errors.OutOfRangeError):
                         if args.bias_analysis:
                             mean_vector_full_data_ = sess.run(mean_vector_full_data,
                                                               {train_images_placeholder: train_data_dict['images'],
@@ -387,7 +387,7 @@ def run_experiment_rotated_mnist_SVGPVAE(args, args_dict):
                             break
 
                 # 7.3) save metrics to Pandas df for model diagnostics
-                if args.save and (epoch + 1) % 10 == 0:
+                if args.save and (epoch + 1) % 10 == 0 and False:
                     if args.test_set_metrics:
                         # sess.run(test_init_op, {test_batch_size_placeholder: N_test})  # see [update, 7.7.] above
                         sess.run(test_init_op, {test_batch_size_placeholder: args.batch_size})
